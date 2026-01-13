@@ -1,17 +1,11 @@
 {
   "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/assets/*.{png,jpg,gif,svg}", "/css/*"]
+    "rewrite": "/products/index.html",
+    "exclude": ["/*.{css,scss,js,png,gif,ico,jpg,jpeg,svg,json,woff,woff2,ttf,eot}"]
   },
-  "routes": [
-    {
-      "route": "/remoteEntry.json",
-      "headers": {
-        "cache-control": "no-store, no-cache, must-revalidate, max-age=0"
-      }
-    }
-  ],
-  "globalHeaders": {
-    "Access-Control-Allow-Origin": "*"
+  "mimeTypes": {
+    ".json": "application/json",
+    ".js": "text/javascript",
+    ".mjs": "text/javascript"
   }
 }

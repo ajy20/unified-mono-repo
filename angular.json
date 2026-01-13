@@ -14,8 +14,7 @@
                     "options": {},
                     "configurations": {
                         "production": {
-                            "target": "host:esbuild:production",
-                            "outputHashing": "all"
+                            "target": "host:esbuild:production"
                         },
                         "development": {
                             "target": "host:esbuild:development",
@@ -38,7 +37,16 @@
                                 "input": "projects/host/public",
                                 "output": "/"
                             },
-                            "projects/host/src/staticwebapp.config.json"
+                            {
+                                "glob": "federation.manifest*.json",
+                                "input": "projects/host/public",
+                                "output": "/"
+                            },
+                            {
+                                "glob": "staticwebapp.config.json",
+                                "input": "projects/host/src",
+                                "output": "/"
+                            }
                         ],
                         "styles": ["projects/host/src/styles.scss"],
                         "polyfills": ["es-module-shims"]
@@ -46,7 +54,11 @@
                     "configurations": {
                         "production": {
                             "budgets": [
-                                { "type": "initial", "maximumWarning": "500kB", "maximumError": "1MB" }
+                                { 
+                                    "type": "initial", 
+                                    "maximumWarning": "500kB", 
+                                    "maximumError": "1MB" 
+                                }
                             ],
                             "outputHashing": "all"
                         },
@@ -75,8 +87,7 @@
                     "options": {},
                     "configurations": {
                         "production": {
-                            "target": "products:esbuild:production",
-                            "outputHashing": "all"
+                            "target": "products:esbuild:production"
                         },
                         "development": {
                             "target": "products:esbuild:development",
@@ -93,14 +104,27 @@
                         "browser": "projects/products/src/main.ts",
                         "tsConfig": "projects/products/tsconfig.app.json",
                         "assets": [
-                            { "glob": "**/*", "input": "projects/products/public" },
-                            "projects/products/src/staticwebapp.config.json"
-                        ]
+                            {
+                                "glob": "**/*",
+                                "input": "projects/products/public",
+                                "output": "/"
+                            },
+                            {
+                                "glob": "staticwebapp.config.json",
+                                "input": "projects/products/src",
+                                "output": "/"
+                            }
+                        ],
+                        "polyfills": ["es-module-shims"]
                     },
                     "configurations": {
                         "production": {
                             "baseHref": "/products/",
                             "outputHashing": "all"
+                        },
+                        "development": {
+                            "optimization": false,
+                            "sourceMap": true
                         }
                     }
                 }
