@@ -1,12 +1,16 @@
 {
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*.{png,jpg,gif,svg}", "/css/*"]
+    "exclude": ["/products/*", "/*.{css,scss,js,png,gif,ico,jpg,svg,json}"]
   },
   "routes": [
     {
       "route": "/products/*",
-      "rewrite": "/products/index.html"
+      "allowedRoles": ["anonymous"]
     }
-  ]
+  ],
+  "mimeTypes": {
+    ".json": "application/json",
+    ".js": "text/javascript"
+  }
 }

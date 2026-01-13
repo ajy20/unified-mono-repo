@@ -8,7 +8,6 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
-
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
@@ -22,21 +21,29 @@ jobs:
         with:
           submodules: true
           lfs: false
-
-      - name: Install Dependencies & Build Apps
-        # We do the work here so we can see any errors clearly
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build Host App
+        run: npm run build host -- --configuration production
+      
+      - name: Build Products Remote
+        run: npm run build products -- --configuration production
+      
+      - name: Copy Products to Host output
         run: |
-          npm install
-          npx ng build host --configuration production
-          npx ng build products --configuration production
-          # Create the unified structure
-          mkdir -p dist/unified-build
-          cp -r dist/host/* dist/unified-build/
-          mkdir -p dist/unified-build/products
-          cp -r dist/products/* dist/unified-build/products/
-          # Verify the folder exists before the next step
-          ls -R dist/unified-build
-
+          mkdir -p dist/host/browser/products
+          cp -r dist/products/browser/* dist/host/browser/products/
+      
+      - name: Install OIDC Client from Core Package
+        run: npm install @actions/core@1.6.0 @actions/http-client
+      
       - name: Get Id Token
         uses: actions/github-script@v6
         id: idtoken
@@ -45,31 +52,19 @@ jobs:
                const coredemo = require('@actions/core')
                return await coredemo.getIDToken()
            result-encoding: string
-
-      - name: Install Dependencies & Build Apps
-        run: |
-          npm install
-          # 1. Verify project names (outputs to logs)
-          npx ng build --help | grep "Available Projects" -A 5 || true
+      
+      - name: Build And Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_SALMON_DESERT_04B34E40F }}
+          action: "upload"
+          app_location: "/" 
+          api_location: "" 
+          output_location: "dist/host/browser"
+          github_id_token: ${{ steps.idtoken.outputs.result }}
+          skip_app_build: true
           
-          # 2. Build Host (Ensure the name 'host' matches your angular.json key)
-          npx ng build host --configuration production
-          
-          # 3. Build Products (Ensure the name 'products' matches your angular.json key)
-          npx ng build products --configuration production
-          
-          # 4. Create the unified structure
-          mkdir -p dist/unified-build
-          cp -r dist/host/* dist/unified-build/
-          
-          # 5. Create products subfolder and copy
-          mkdir -p dist/unified-build/products
-          cp -r dist/products/* dist/unified-build/products/
-          
-          # 6. Final verification of the structure
-          ls -R dist/unified-build
-          ###### End of Repository/Build Configurations ######
-
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
