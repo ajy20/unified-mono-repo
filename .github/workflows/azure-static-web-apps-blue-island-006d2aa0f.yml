@@ -39,6 +39,52 @@ jobs:
       - name: Build Products Remote Application
         run: npm run build products -- --configuration production
       
+      - name: Verify Host Build Output
+        run: |
+          echo "Checking host build output structure..."
+          ls -la dist/host/
+          
+          # Check if browser folder exists
+          if [ -d "dist/host/browser" ]; then
+            echo "✓ dist/host/browser exists"
+            ls -la dist/host/browser/ | head -20
+            
+            # Check for index.html
+            if [ -f "dist/host/browser/index.html" ]; then
+              echo "✓ index.html found in dist/host/browser/"
+            else
+              echo "✗ index.html NOT found in dist/host/browser/"
+              exit 1
+            fi
+          else
+            echo "✗ dist/host/browser does NOT exist"
+            echo "Available files in dist/host:"
+            ls -la dist/host/
+            exit 1
+          fi
+      
+      - name: Verify Products Build Output
+        run: |
+          echo "Checking products build output structure..."
+          ls -la dist/products/
+          
+          if [ -d "dist/products/browser" ]; then
+            echo "✓ dist/products/browser exists"
+            ls -la dist/products/browser/ | head -20
+            
+            # Check for remoteEntry.json
+            if [ -f "dist/products/browser/remoteEntry.json" ]; then
+              echo "✓ remoteEntry.json found"
+            else
+              echo "✗ remoteEntry.json NOT found"
+              exit 1
+            fi
+          else
+            echo "✗ dist/products/browser does NOT exist"
+            ls -la dist/products/
+            exit 1
+          fi
+      
       - name: Create deployment structure
         run: |
           echo "Creating deployment structure..."
@@ -49,19 +95,29 @@ jobs:
           # Copy products build into host/browser/products
           cp -r dist/products/browser/* dist/host/browser/products/
           
-          # Verify structure
-          echo "Verifying deployment structure:"
+          # Verify final structure
+          echo ""
+          echo "Final deployment structure:"
           echo "Root files:"
           ls -la dist/host/browser/ | head -20
           echo ""
           echo "Products folder:"
           ls -la dist/host/browser/products/ | head -20
           echo ""
-          echo "Checking for remoteEntry.json:"
-          if [ -f "dist/host/browser/products/remoteEntry.json" ]; then
-            echo "✓ remoteEntry.json found in products folder"
+          
+          # Verify critical files
+          echo "Verifying critical files..."
+          if [ -f "dist/host/browser/index.html" ]; then
+            echo "✓ index.html exists in root"
           else
-            echo "✗ remoteEntry.json NOT found in products folder"
+            echo "✗ index.html missing in root"
+            exit 1
+          fi
+          
+          if [ -f "dist/host/browser/products/remoteEntry.json" ]; then
+            echo "✓ remoteEntry.json exists in products folder"
+          else
+            echo "✗ remoteEntry.json missing in products folder"
             exit 1
           fi
       
