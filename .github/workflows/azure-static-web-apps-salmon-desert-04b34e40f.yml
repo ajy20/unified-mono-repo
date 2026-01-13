@@ -38,19 +38,17 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_SALMON_DESERT_04B34E40F }}
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "/" # App source code path
-          api_location: "" # Api source code path - optional
-          # Azure will look in this folder for the combined build
-          output_location: "dist/unified-build" 
+          app_location: "/" 
+          api_location: "" 
+          # FIX: Point directly to the browser subfolder where index.html lives
+          output_location: "dist/unified-build/browser" 
           github_id_token: ${{ steps.idtoken.outputs.result }}
-          # CUSTOM BUILD COMMAND:
-          # 1. Build Host to the main output folder
-          # 2. Build Products into the 'products' subfolder
+          # UPDATED COMMAND:
+          # We build products into 'dist/unified-build/browser/products'
+          # so it is accessible as a subfolder of the Host app.
           app_build_command: |
             npx ng build host --configuration production --output-path=dist/unified-build
-            npx ng build products --configuration production --output-path=dist/unified-build/products
+            npx ng build products --configuration production --output-path=dist/unified-build/browser/products
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
