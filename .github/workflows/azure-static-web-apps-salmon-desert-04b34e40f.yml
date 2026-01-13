@@ -22,8 +22,21 @@ jobs:
         with:
           submodules: true
           lfs: false
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.6.0 @actions/http-client
+
+      - name: Install Dependencies & Build Apps
+        # We do the work here so we can see any errors clearly
+        run: |
+          npm install
+          npx ng build host --configuration production
+          npx ng build products --configuration production
+          # Create the unified structure
+          mkdir -p dist/unified-build
+          cp -r dist/host/* dist/unified-build/
+          mkdir -p dist/unified-build/products
+          cp -r dist/products/* dist/unified-build/products/
+          # Verify the folder exists before the next step
+          ls -R dist/unified-build
+
       - name: Get Id Token
         uses: actions/github-script@v6
         id: idtoken
@@ -32,31 +45,19 @@ jobs:
                const coredemo = require('@actions/core')
                return await coredemo.getIDToken()
            result-encoding: string
-      - name: Build And Deploy
+
+      - name: Deploy to Azure
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_SALMON_DESERT_04B34E40F }}
           action: "upload"
-          # 1. Point app_location to the folder where the files WILL BE after build
+          # When skip_app_build is true, app_location IS the artifact folder
           app_location: "dist/unified-build" 
           api_location: ""
-          # 2. Set output_location to empty because we are skipping the internal build
-          output_location: "" 
-          # 3. Tell Azure NOT to run its own build engine
+          output_location: "" # Leave empty when skipping build
           skip_app_build: true 
           github_id_token: ${{ steps.idtoken.outputs.result }}
-          # 4. Run the manual build commands before the upload starts
-          app_build_command: |
-            npm install
-            npx ng build host --configuration production
-            npx ng build products --configuration production
-            mkdir -p dist/unified-build
-            cp -r dist/host/* dist/unified-build/
-            mkdir -p dist/unified-build/products
-            cp -r dist/products/* dist/unified-build/products/
-            # Log the final structure so we can see it in GitHub logs
-            ls -R dist/unified-build
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
