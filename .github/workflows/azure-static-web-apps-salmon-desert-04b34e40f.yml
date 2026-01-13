@@ -43,15 +43,18 @@ jobs:
           output_location: "dist/unified-build" 
           github_id_token: ${{ steps.idtoken.outputs.result }}
           # UPDATED COMMAND:
-          # 1. Build apps using their angular.json settings
-          # 2. Use shell commands (mkdir/cp) to create the unified structure
+          # We use 'npx' to ensure we use the local Angular CLI.
+          # We manually create the unified folder and copy the builds.
           app_build_command: |
+            node --version
+            npm --version
             npx ng build host --configuration production
             npx ng build products --configuration production
             mkdir -p dist/unified-build
             cp -r dist/host/* dist/unified-build/
             mkdir -p dist/unified-build/products
             cp -r dist/products/* dist/unified-build/products/
+            ls -R dist/unified-build
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
