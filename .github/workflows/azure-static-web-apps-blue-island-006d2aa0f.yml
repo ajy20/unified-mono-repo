@@ -34,10 +34,10 @@ jobs:
         run: npm ci
       
       - name: Build Host Application
-        run: npm run build host -- --configuration production
+        run: npx ng build host --configuration production
       
       - name: Build Products Remote Application
-        run: npm run build products -- --configuration production
+        run: npx ng build products --configuration production
       
       - name: Verify Host Build Output
         run: |
