@@ -140,9 +140,9 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_ISLAND_006D2AA0F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/"
+          app_location: "dist/host/browser"  # Point directly to built files
           api_location: ""
-          output_location: "dist/host/browser"
+          output_location: ""  # Leave empty when pointing directly to build output
           skip_app_build: true
           github_id_token: ${{ steps.idtoken.outputs.result }}
 
